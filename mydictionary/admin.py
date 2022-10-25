@@ -1,3 +1,12 @@
 from django.contrib import admin
+from .models import *
 
-# Register your models here.
+
+@admin.register(Word)
+class WordAdmin(admin.ModelAdmin):
+    prepopulated_fields = {"slug": ("name",)}
+
+
+@admin.register(Video)
+class VideoAdmin(admin.ModelAdmin):
+    prepopulated_fields = {"slug": ("title",)}

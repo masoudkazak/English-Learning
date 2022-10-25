@@ -3,11 +3,7 @@ from slugify import slugify
 from django.contrib.auth.models import User
 
 
-class Word(models.Model):
-    class Type(models.IntegerChoices):
-        Noun = 0
-        Verb = 1
-    
+class Word(models.Model):    
     class Status(models.IntegerChoices):
         weak = 0
         normal = 1
@@ -17,11 +13,10 @@ class Word(models.Model):
     owner = models.ForeignKey(User, on_delete=models.CASCADE)
     slug = models.SlugField()
     translate = models.CharField(max_length=50)
-    pronounciation = models.CharField(max_length=50, blank=True, null=True)
+    pronunciation = models.CharField(max_length=50, blank=True, null=True)
     example = models.TextField(blank=True, null=True)
-    type_word = models.CharField(choices=Type.choices, max_length=1)
     description = models.TextField(blank=True, null=True)
-    status = models.CharField(max_length=1, choices=Status.choices)
+    status = models.IntegerField(choices=Status.choices)
     created = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now=True)
 
@@ -31,7 +26,7 @@ class Word(models.Model):
         verbose_name = "word"
 
     def save(self, *args, **kwargs):
-        self.slug = slugify(self.title)
+        self.slug = slugify(self.name)
         return super().save(*args, **kwargs)
     
     def __str__(self):
@@ -40,8 +35,19 @@ class Word(models.Model):
 
 class Video(models.Model):
     title = models.CharField(max_length=100)
-    file = models.FileField()
+    slug = models.SlugField()
+    file = models.FileField(upload_to="%Y/%m/%d/")
     words = models.ManyToManyField(Word)
+    owner = models.ForeignKey(User, on_delete=models.CASCADE)
+
+    class Meta:
+        ordering = ["title"]
+        verbose_name_plural = "videos"
+        verbose_name = "video"
+    
+    def save(self, *args, **kwargs):
+        self.slug = slugify(self.title)
+        return super().save(*args, **kwargs)
 
     def __str__(self):
         return self.title
