@@ -1,3 +1,4 @@
+from enum import unique
 from django.db import models
 from slugify import slugify
 from django.contrib.auth.models import User
@@ -33,11 +34,30 @@ class Word(models.Model):
         return self.name
 
 
+class VideoCategory(models.Model):
+    name = models.CharField(max_length=50, unique=True)
+    slug = models.SlugField()
+    owner = models.ForeignKey(User, on_delete=models.CASCADE)
+
+    class Meta:
+        ordering = ["name"]
+        verbose_name_plural = "categories"
+        verbose_name = "category"
+    
+    def save(self, *args, **kwargs):
+        self.slug = slugify(self.name)
+        return super().save(*args, **kwargs)
+    
+    def __str__(self):
+        return self.name
+
+
 class Video(models.Model):
     title = models.CharField(max_length=100)
     slug = models.SlugField()
+    category = models.ManyToManyField(VideoCategory, blank=True, null=True)
     file = models.FileField(upload_to="%Y/%m/%d/")
-    words = models.ManyToManyField(Word)
+    words = models.ManyToManyField(Word, blank=True, null=True)
     owner = models.ForeignKey(User, on_delete=models.CASCADE)
 
     class Meta:
