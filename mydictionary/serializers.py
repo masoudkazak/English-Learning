@@ -7,3 +7,8 @@ class WordCreateSerializer(serializers.ModelSerializer):
         model = Word
         exclude = ("slug", "created", "updated")
         
+
+class VideoUploadSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Video
+        exclude = ("slug",)
