@@ -2,7 +2,7 @@ import pytest
 from rest_framework import status
 from django.urls import reverse
 import random
-from mydictionary.models import VideoCategory, Word
+from mydictionary.models import Video, VideoCategory, Word
 
 
 pytestmark = pytest.mark.django_db
@@ -73,31 +73,58 @@ def test_word_detail_put_delete(api_client, word_create_fixture):
     
 
 # How can we know that this page has objects?
-# def test_mywords_http_200(api_client, word_create_fixture):
-#     api_client.force_authenticate(user=word_create_fixture.owner)
+def test_mywords_http_200(api_client, word_create_fixture):
+    api_client.force_authenticate(user=word_create_fixture.owner)
 
-#     response = api_client.get(reverse("mydictionary:word-list"))
+    response = api_client.get(reverse("mydictionary:word-list"))
 
-#     assert response.status_code == status.HTTP_200_OK
-
-
-# def test_video_upload_HTTP_201(api_client, user_create_fixture):
-#     api_client.force_authenticate(user=user_create_fixture)
-
-#     video_create = {
-#         "title":"welcome",
-#         "file":"/media/test/9af5a68a7cbe7b93606cd31835cb13cf48401502-144p_RSxgeDT.mp4",
-#         "owner":user_create_fixture.id
-#     }
-#     response = api_client.post(reverse("mydictionary:upload-video"), video_create)
-
-#     assert response.status_code == status.HTTP_201_CREATED
+    assert response.status_code == status.HTTP_200_OK
 
 
-# Here test VideoUploadDetailView
+def test_video_upload_HTTP_201(api_client, user_create_fixture):
+    api_client.force_authenticate(user=user_create_fixture)
+
+    with open("/home/masoud/Desktop/sample.mp4", "rb") as file:
+        video_create = {
+            "title":"welcome",
+            "file":file,
+            "owner":user_create_fixture.id
+        }
+        response = api_client.post(reverse("mydictionary:upload-video"), video_create)
+    assert response.status_code == status.HTTP_201_CREATED
 
 
-# Here test VideoUploadListView
+def test_video_put_delete(api_client, video_upload_fixture):
+    api_client.force_authenticate(user=video_upload_fixture.owner)
+    with open("/home/masoud/Desktop/sample1.mp4", "rb") as file:
+        video_update = {
+            "title":"welcome here",
+            "file":file,
+            "owner":video_upload_fixture.owner.id,
+        }
+        response_put = api_client.put(reverse("mydictionary:video-detail",
+                                        kwargs={
+                                            "username":video_upload_fixture.owner.username,
+                                            "slug":video_upload_fixture.slug,
+                                        }), video_update)
+
+    new_video = Video.objects.filter(owner=video_upload_fixture.owner.id)[0]
+    assert new_video.title != video_upload_fixture.title
+
+    response_delete = api_client.delete(reverse("mydictionary:video-detail",
+                                            kwargs={
+                                                "username":video_upload_fixture.owner.username,
+                                                "slug":new_video.slug,
+                                            }))                                  
+    assert response_delete.status_code == status.HTTP_204_NO_CONTENT
+
+
+def test_video_list_http_200(api_client, user_create_fixture):
+    api_client.force_authenticate(user=user_create_fixture)
+    
+    response = api_client.get(reverse("mydictionary:video-list"))
+
+    assert response.status_code == status.HTTP_200_OK
 
 
 def test_video_category_create_http_200(api_client, user_create_fixture):
@@ -134,5 +161,4 @@ def test_video_category_put_delete(api_client, video_category_create_fixture):
                                                 "username":new_category.owner.username,
                                                 "slug":new_category.slug,
                                             }))
-    print(VideoCategory.objects.filter(owner=video_category_create_fixture.owner.id))
     assert response_delete.status_code == status.HTTP_204_NO_CONTENT
