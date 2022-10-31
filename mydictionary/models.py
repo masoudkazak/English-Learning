@@ -10,7 +10,7 @@ class Word(models.Model):
         normal = 1
         good = 2
         
-    name = models.CharField(max_length=50, unique=True)
+    name = models.CharField(max_length=50)
     owner = models.ForeignKey(User, on_delete=models.CASCADE)
     slug = models.SlugField()
     translate = models.CharField(max_length=50)
@@ -35,7 +35,7 @@ class Word(models.Model):
 
 
 class VideoCategory(models.Model):
-    name = models.CharField(max_length=50, unique=True)
+    name = models.CharField(max_length=50)
     slug = models.SlugField()
     owner = models.ForeignKey(User, on_delete=models.CASCADE)
 

@@ -4,10 +4,13 @@ from .serializers import *
 from rest_framework.response import Response
 from rest_framework import status
 from django.shortcuts import get_object_or_404
+from rest_framework import permissions
+from .permissions import IsOwnerOrSuperuser
 
 
 class WordCreateView(APIView):
     serializer_class = WordCreateSerializer
+    permission_classes = [permissions.IsAuthenticated]
 
     def get(self, request, *args, **kwargs):
         serializer = self.serializer_class()
@@ -16,13 +19,14 @@ class WordCreateView(APIView):
     def post(self, request, *args, **kwargs):
         serializer = self.serializer_class(data=request.data)
         if serializer.is_valid():
-            serializer.save()
+            serializer.save(owner=request.user)
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 class WordDetailView(APIView):
     serializer_class = WordCreateSerializer
+    permission_classes = [IsOwnerOrSuperuser]
 
     def get_object(self):
         word = get_object_or_404(Word, 
@@ -38,7 +42,7 @@ class WordDetailView(APIView):
     def put(self, request, *args, **kwargs):
         serializer = self.serializer_class(self.get_object(), data=request.data)
         if serializer.is_valid():
-            serializer.save()
+            serializer.save(owner=request.user)
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     
@@ -50,6 +54,7 @@ class WordDetailView(APIView):
 
 class MyWordsListView(APIView):
     serializer_class = WordCreateSerializer
+    permission_classes = [IsOwnerOrSuperuser]
 
     def get_queryset(self):
         words = Word.objects.filter(owner=self.request.user)
@@ -62,6 +67,8 @@ class MyWordsListView(APIView):
 
 class VideoUploadView(APIView):
     serializer_class = VideoUploadSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
     def get(self, request, *args, **kwargs):
         serializer = self.serializer_class()
         return Response(serializer.data, status=status.HTTP_200_OK)
@@ -69,13 +76,14 @@ class VideoUploadView(APIView):
     def post(self, request, *args, **kwargs):
         serializer = self.serializer_class(data=request.data)
         if serializer.is_valid():
-            serializer.save()
+            serializer.save(owner=request.user)
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 class VideoUploadDetailView(APIView):
     serializer_class = VideoUploadSerializer
+    permission_classes = [IsOwnerOrSuperuser]
 
     def get_object(self):
         video = get_object_or_404(Video, 
@@ -91,7 +99,7 @@ class VideoUploadDetailView(APIView):
     def put(self, request, *args, **kwargs):
         serializer = self.serializer_class(self.get_object(), data=request.data)
         if serializer.is_valid():
-            serializer.save()
+            serializer.save(owner=request.user)
             return Response(serializer.data, status=status.HTTP_202_ACCEPTED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     
@@ -103,6 +111,7 @@ class VideoUploadDetailView(APIView):
 
 class MyVideoListView(APIView):
     serializer_class = VideoUploadSerializer
+    permission_classes = [IsOwnerOrSuperuser]
 
     def get_queryset(self):
         videos = Video.objects.filter(owner=self.request.user)
@@ -115,6 +124,7 @@ class MyVideoListView(APIView):
 
 class VideoCategoryCreate(APIView):
     serializer_class = VideoCategorySerializer
+    permission_classes = [permissions.IsAuthenticated]
 
     def get(self, request, *args, **kwargs):
         serializer = self.serializer_class()
@@ -123,13 +133,14 @@ class VideoCategoryCreate(APIView):
     def post(self, request, *args, **kwargs):
         serializer = self.serializer_class(data=request.data)
         if serializer.is_valid():
-            serializer.save()
+            serializer.save(owner=request.user)
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 class VideoCategoryDetail(APIView):
     serializer_class = VideoCategorySerializer
+    permission_classes = [IsOwnerOrSuperuser]
 
     def get_object(self):
         category = get_object_or_404(VideoCategory, 
@@ -145,7 +156,7 @@ class VideoCategoryDetail(APIView):
     def put(self, request, *args, **kwargs):
         serializer = self.serializer_class(self.get_object(), data=request.data)
         if serializer.is_valid():
-            serializer.save()
+            serializer.save(owner=request.user)
             return Response(serializer.data, status=status.HTTP_202_ACCEPTED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     
