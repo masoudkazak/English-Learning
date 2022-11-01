@@ -17,7 +17,7 @@ class Word(models.Model):
     pronunciation = models.CharField(max_length=50, blank=True, null=True)
     example = models.TextField(blank=True, null=True)
     description = models.TextField(blank=True, null=True)
-    status = models.IntegerField(choices=Status.choices)
+    status = models.IntegerField(choices=Status.choices, blank=True, null=True)
     created = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now=True)
 

@@ -69,7 +69,7 @@ class MyWordsListView(APIView):
 
 class CSVWordsUploadView(APIView):
     serializer_class = WordsCSVFileSerializer
-    permission_classes = [permissions.IsAuthenticated, IsOwnerOrSuperuser]
+    permission_classes = [permissions.IsAuthenticated]
 
     def get(self, request, *args, **kwargs):
         serializer = self.serializer_class()
@@ -85,7 +85,6 @@ class CSVWordsUploadView(APIView):
                         name=row[0],
                         owner=request.user,
                         translate=row[1],
-                        status=0,
                     )
             return HttpResponseRedirect(reverse("mydictionary:word-list"))
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)

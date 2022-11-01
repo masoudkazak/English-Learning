@@ -162,3 +162,15 @@ def test_video_category_put_delete(api_client, video_category_create_fixture):
                                                 "slug":new_category.slug,
                                             }))
     assert response_delete.status_code == status.HTTP_204_NO_CONTENT
+
+
+def test_csv_upload_words_create(api_client, user_create_fixture):
+    api_client.force_authenticate(user=user_create_fixture)
+
+    with open("/home/masoud/Desktop/sample2.csv", "rb") as file:
+        csv_create = {
+            "file":file,
+        }
+        response = api_client.post(reverse("mydictionary:word-csv"), csv_create)
+    
+    assert Word.objects.filter(owner=user_create_fixture).exists()
