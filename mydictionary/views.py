@@ -6,6 +6,8 @@ from rest_framework import status
 from django.shortcuts import get_object_or_404
 from rest_framework import permissions
 from .permissions import IsOwnerOrSuperuser
+from django.http import HttpResponseRedirect
+from django.urls import reverse
 
 
 class WordCreateView(APIView):
@@ -26,7 +28,7 @@ class WordCreateView(APIView):
 
 class WordDetailView(APIView):
     serializer_class = WordCreateSerializer
-    permission_classes = [IsOwnerOrSuperuser]
+    permission_classes = [permissions.IsAuthenticated, IsOwnerOrSuperuser]
 
     def get_object(self):
         word = get_object_or_404(Word, 
@@ -54,7 +56,7 @@ class WordDetailView(APIView):
 
 class MyWordsListView(APIView):
     serializer_class = WordCreateSerializer
-    permission_classes = [IsOwnerOrSuperuser]
+    permission_classes = [permissions.IsAuthenticated, IsOwnerOrSuperuser]
 
     def get_queryset(self):
         words = Word.objects.filter(owner=self.request.user)
@@ -63,6 +65,30 @@ class MyWordsListView(APIView):
     def get(self, request, *args, **kwargs):
         serializer = self.serializer_class(self.get_queryset(), many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
+
+
+class CSVWordsUploadView(APIView):
+    serializer_class = WordsCSVFileSerializer
+    permission_classes = [permissions.IsAuthenticated, IsOwnerOrSuperuser]
+
+    def get(self, request, *args, **kwargs):
+        serializer = self.serializer_class()
+        return Response(serializer.data, status=status.HTTP_200_OK)
+    
+    def post(self, request, *args, **kwargs):
+        serializer = self.serializer_class(data=request.data)
+        if serializer.is_valid():
+            file = serializer.validated_data["file"]
+            csvfile = csv.reader(codecs.iterdecode(file, "utf-8"))
+            for row in csvfile:
+                Word.objects.create(
+                        name=row[0],
+                        owner=request.user,
+                        translate=row[1],
+                        status=0,
+                    )
+            return HttpResponseRedirect(reverse("mydictionary:word-list"))
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 class VideoUploadView(APIView):
@@ -83,7 +109,7 @@ class VideoUploadView(APIView):
 
 class VideoUploadDetailView(APIView):
     serializer_class = VideoUploadSerializer
-    permission_classes = [IsOwnerOrSuperuser]
+    permission_classes = [permissions.IsAuthenticated, IsOwnerOrSuperuser]
 
     def get_object(self):
         video = get_object_or_404(Video, 
@@ -111,7 +137,7 @@ class VideoUploadDetailView(APIView):
 
 class MyVideoListView(APIView):
     serializer_class = VideoUploadSerializer
-    permission_classes = [IsOwnerOrSuperuser]
+    permission_classes = [permissions.IsAuthenticated, IsOwnerOrSuperuser]
 
     def get_queryset(self):
         videos = Video.objects.filter(owner=self.request.user)
@@ -140,7 +166,7 @@ class VideoCategoryCreate(APIView):
 
 class VideoCategoryDetail(APIView):
     serializer_class = VideoCategorySerializer
-    permission_classes = [IsOwnerOrSuperuser]
+    permission_classes = [permissions.IsAuthenticated, IsOwnerOrSuperuser]
 
     def get_object(self):
         category = get_object_or_404(VideoCategory, 
