@@ -8,6 +8,7 @@ from rest_framework import permissions
 from .permissions import IsOwnerOrSuperuser
 from django.http import HttpResponseRedirect
 from django.urls import reverse
+from .tasks import create_word_task
 
 
 class WordCreateView(APIView):
@@ -81,11 +82,11 @@ class CSVWordsUploadView(APIView):
             file = serializer.validated_data["file"]
             csvfile = csv.reader(codecs.iterdecode(file, "utf-8"))
             for row in csvfile:
-                Word.objects.create(
-                        name=row[0],
-                        owner=request.user,
-                        translate=row[1],
-                    )
+                create_word_task.delay(
+                    row[0],
+                    row[1],
+                    request.user.id,
+                )
             return HttpResponseRedirect(reverse("mydictionary:word-list"))
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 

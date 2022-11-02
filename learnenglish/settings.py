@@ -59,9 +59,9 @@ WSGI_APPLICATION = 'learnenglish.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.mysql',
+        'ENGINE': 'django.db.backends.postgresql',
         'NAME': config("NAME"),
-        'USER': 'root',
+        'USER': config("USER"),
         'PASSWORD': config("PASSWORD"),
         'HOST': config("HOST"),
         'PORT': config("PORT"),
@@ -93,6 +93,8 @@ USE_I18N = True
 
 USE_TZ = True
 
+LOGIN_REDIRECT_URL = "/mydictionary/words/"
+LOGOUT_REDIRECT_URL = "/"
 
 STATIC_URL = 'static/'
 STATICFILES_DIRS = (
@@ -104,3 +106,17 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'media/')
 
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+CELERY_BROKER_URL = "redis://localhost:6379"
+CELERY_RESULT_BACKEND = "redis://localhost:6379"
+
+CACHES = {
+    "default": {
+        "BACKEND": "django_redis.cache.RedisCache",
+        "LOCATION": config("LOCATION"),
+        'TIMEOUT': 5*60,
+        "OPTIONS": {
+            "CLIENT_CLASS": "django_redis.client.DefaultClient",
+        }
+    }
+}
