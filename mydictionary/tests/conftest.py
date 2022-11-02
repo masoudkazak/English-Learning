@@ -1,7 +1,7 @@
 import pytest
 from rest_framework.test import APIClient
 from django.contrib.auth.models import User
-from mydictionary.models import Video, VideoCategory, Word
+from mydictionary.models import Video, Word
 import random
 from django.urls import reverse
 
@@ -36,19 +36,6 @@ def word_create_fixture():
         status =random.randint(0,2),
     )
     return word
-
-
-@pytest.fixture
-def video_category_create_fixture():
-    user = User.objects.create_user(
-        username="someone1",
-        password="something"
-        )
-    category = VideoCategory.objects.create(
-        name ="My Course",
-        owner =user,
-    )
-    return category
 
 
 @pytest.fixture

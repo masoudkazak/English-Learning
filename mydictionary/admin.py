@@ -10,13 +10,6 @@ class WordAdmin(admin.ModelAdmin):
     prepopulated_fields = {"slug": ("name",)}
 
 
-@admin.register(VideoCategory)
-class VideCategoryAdmin(admin.ModelAdmin):
-    list_display = ["name", "owner"]
-    search_fields = ["title"]
-    prepopulated_fields = {"slug": ("name",)}
-
-
 @admin.register(Video)
 class VideoAdmin(admin.ModelAdmin):
     list_display = ["title", "owner"]

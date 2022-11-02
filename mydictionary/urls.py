@@ -12,7 +12,5 @@ urlpatterns = [
     path("video/upload/", VideoUploadView.as_view(), name="upload-video"),
     path("video/<str:username>/<slug:slug>/", VideoUploadDetailView.as_view(), name="video-detail"),
     path("videos/", MyVideoListView.as_view(), name="video-list"),
-    path("video-category/create/", VideoCategoryCreate.as_view(), name="videocategory-create"),
-    path("video-category/<str:username>/<slug:slug>/", VideoCategoryDetail.as_view(), name="videocategory-detail"),
     path("word/csv-upload/", CSVWordsUploadView.as_view(), name="word-csv"),
 ]

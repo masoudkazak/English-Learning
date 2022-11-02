@@ -1,8 +1,9 @@
+from time import sleep
 import pytest
 from rest_framework import status
 from django.urls import reverse
 import random
-from mydictionary.models import Video, VideoCategory, Word
+from mydictionary.models import Video, Word
 
 
 pytestmark = pytest.mark.django_db
@@ -85,36 +86,23 @@ def test_video_upload_HTTP_201(api_client, user_create_fixture):
     api_client.force_authenticate(user=user_create_fixture)
 
     with open("/home/masoud/Desktop/sample.mp4", "rb") as file:
+        print(file)
         video_create = {
             "title":"welcome",
             "file":file,
             "owner":user_create_fixture.id
         }
         response = api_client.post(reverse("mydictionary:upload-video"), video_create)
-    assert response.status_code == status.HTTP_201_CREATED
+    assert response.status_code == status.HTTP_202_ACCEPTED
 
 
-def test_video_put_delete(api_client, video_upload_fixture):
+def test_video_delete(api_client, video_upload_fixture):
     api_client.force_authenticate(user=video_upload_fixture.owner)
-    with open("/home/masoud/Desktop/sample1.mp4", "rb") as file:
-        video_update = {
-            "title":"welcome here",
-            "file":file,
-            "owner":video_upload_fixture.owner.id,
-        }
-        response_put = api_client.put(reverse("mydictionary:video-detail",
-                                        kwargs={
-                                            "username":video_upload_fixture.owner.username,
-                                            "slug":video_upload_fixture.slug,
-                                        }), video_update)
-
-    new_video = Video.objects.filter(owner=video_upload_fixture.owner.id)[0]
-    assert new_video.title != video_upload_fixture.title
 
     response_delete = api_client.delete(reverse("mydictionary:video-detail",
                                             kwargs={
                                                 "username":video_upload_fixture.owner.username,
-                                                "slug":new_video.slug,
+                                                "slug":video_upload_fixture.slug,
                                             }))                                  
     assert response_delete.status_code == status.HTTP_204_NO_CONTENT
 
@@ -127,43 +115,6 @@ def test_video_list_http_200(api_client, user_create_fixture):
     assert response.status_code == status.HTTP_200_OK
 
 
-def test_video_category_create_http_200(api_client, user_create_fixture):
-    api_client.force_authenticate(user=user_create_fixture)
-
-    category = {
-        "name":"Course",
-        "owner":user_create_fixture.id,
-    }
-    response = api_client.post(reverse("mydictionary:videocategory-create"), category)
-
-    assert response.status_code == status.HTTP_201_CREATED
-
-
-def test_video_category_put_delete(api_client, video_category_create_fixture):
-    api_client.force_authenticate(user=video_category_create_fixture.owner)
-
-    category_update = {
-        "name":"His Course",
-        "owner":video_category_create_fixture.owner.id,
-    }
-
-    response_put = api_client.put(reverse("mydictionary:videocategory-detail",
-                                    kwargs={
-                                        "username":video_category_create_fixture.owner.username,
-                                        "slug":video_category_create_fixture.slug,
-                                    }),
-                                    category_update)
-    new_category = VideoCategory.objects.filter(owner=video_category_create_fixture.owner.id)[0]
-    assert new_category.name != video_category_create_fixture.name
-
-    response_delete = api_client.delete(reverse("mydictionary:videocategory-detail",
-                                            kwargs={
-                                                "username":new_category.owner.username,
-                                                "slug":new_category.slug,
-                                            }))
-    assert response_delete.status_code == status.HTTP_204_NO_CONTENT
-
-
 def test_csv_upload_words_create(api_client, user_create_fixture):
     api_client.force_authenticate(user=user_create_fixture)
 
@@ -172,5 +123,4 @@ def test_csv_upload_words_create(api_client, user_create_fixture):
             "file":file,
         }
         response = api_client.post(reverse("mydictionary:word-csv"), csv_create)
-    
-    assert Word.objects.filter(owner=user_create_fixture).exists()
+    assert response.status_code == status.HTTP_202_ACCEPTED
