@@ -1,16 +1,19 @@
 from .models import *
-from rest_framework.views import APIView
+from .permissions import IsOwnerOrSuperuser
+from .tasks import create_word_task, upload_video_task
 from .serializers import *
+
+from rest_framework.views import APIView
+from rest_framework import permissions, filters
+from rest_framework.generics import ListAPIView
 from rest_framework.response import Response
 from rest_framework import status
+from rest_framework.pagination import LimitOffsetPagination
+
 from django.shortcuts import get_object_or_404
-from rest_framework import permissions
-from .permissions import IsOwnerOrSuperuser
-from django.http import HttpResponseRedirect
-from django.urls import reverse
-from .tasks import create_word_task, upload_video_task
 from django.core.files.storage import FileSystemStorage
 from django.core.files import File
+
 import csv
 import codecs
 
@@ -59,17 +62,17 @@ class WordDetailView(APIView):
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 
-class MyWordsListView(APIView):
+class MyWordsListView(ListAPIView):
     serializer_class = WordCreateSerializer
     permission_classes = [permissions.IsAuthenticated, IsOwnerOrSuperuser]
+    pagination_class = LimitOffsetPagination
+    filter_backends = [filters.SearchFilter, filters.OrderingFilter]
+    search_fields = ['name', "translate"]
+    ordering_fields = ['name', "status", "updated"]
 
     def get_queryset(self):
         words = Word.objects.filter(owner=self.request.user)
         return words
-
-    def get(self, request, *args, **kwargs):
-        serializer = self.serializer_class(self.get_queryset(), many=True)
-        return Response(serializer.data, status=status.HTTP_200_OK)
 
 
 class CSVWordsUploadView(APIView):
@@ -144,14 +147,14 @@ class VideoUploadDetailView(APIView):
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 
-class MyVideoListView(APIView):
+class MyVideoListView(ListAPIView):
     serializer_class = VideoUploadSerializer
     permission_classes = [permissions.IsAuthenticated, IsOwnerOrSuperuser]
+    pagination_class = LimitOffsetPagination
+    filter_backends = [filters.SearchFilter, filters.OrderingFilter]
+    search_fields = ['title']
+    ordering_fields = ['title']
 
     def get_queryset(self):
         videos = Video.objects.filter(owner=self.request.user)
         return videos
-
-    def get(self, request, *args, **kwargs):
-        serializer = self.serializer_class(self.get_queryset(), many=True)
-        return Response(serializer.data, status=status.HTTP_200_OK)
