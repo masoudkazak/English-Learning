@@ -21,11 +21,15 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+
     "mydictionary",
+    "chat",
 
     'rest_framework',
+    'channels',
     'django_filters',
 ]
+
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -56,6 +60,18 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = 'learnenglish.wsgi.application'
+ASGI_APPLICATION = "learnenglish.asgi.application"
+
+
+CHANNEL_LAYERS = {
+    "default": {
+        "BACKEND": "channels_redis.core.RedisChannelLayer",
+        "CONFIG": {
+            "hosts": [("127.0.0.1", 6360)],
+        },
+    },
+}
+
 
 
 DATABASES = {
@@ -126,3 +142,4 @@ REST_FRAMEWORK = {
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.LimitOffsetPagination',
     'DEFAULT_FILTER_BACKENDS': ['django_filters.rest_framework.DjangoFilterBackend'],
 }
+
